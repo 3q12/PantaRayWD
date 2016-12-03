@@ -5,7 +5,7 @@ int main(){
         char b;
         FILE *Save1 = fopen("Save1", "wt");
         FILE *Save2 = fopen("Save2", "wt");
-        system("gcc -o sensor1 sensor11.c");
+        system("gcc -o sensor1 sensor1.c");
         system("gcc -o sensor2 sensor2.c");
         while(1){
         a[0]='\0';
