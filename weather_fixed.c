@@ -9,6 +9,7 @@ typedef struct
 	float windspd;
 	float humid;
 }weather;
+weather saved[4];
 void RESET_RSS()
 {
 	system("rm ./queryDFSRSS.jsp@zone=1159068000");
@@ -56,24 +57,21 @@ void OUTPUT(weather *saved)
 		printf("windspd : %.1f\n", saved[cnt].windspd);
 		printf("humid : %.1f\n", saved[cnt].humid);
 	}
-}	
-int main()
+}
+FILE *OPENFILE(void)
 {
-
-	RESET_RSS();
-
-	weather saved[4];
-	char tmp;
-	int cnt = 0;
-	int line = 0;
-	char arrtmp[5];
-
-	FILE *ifp, *ofp;
+	FILE *ifp;
 
 	ifp = fopen("queryDFSRSS.jsp@zone=1159068000", "r");
 	if((ifp = fopen("queryDFSRSS.jsp@zone=1159068000", "r")) == NULL)
 		printf("file couldn't be opened");
 
+	return ifp;
+}
+void PARCE_DATA(FILE *ifp, weather *saved, char *arrtmp)
+{
+	char tmp;
+	int cnt = 0;
 
 	while((fscanf(ifp, "%c", &tmp) != EOF) && cnt < 4){//cnt가 4를 넘으면 이상한 공간이 형성 되므로 4 전에 강제 종료 시켜버림
 		if(tmp == '<')
@@ -81,35 +79,30 @@ int main()
 			CHECK_INFO(ifp, arrtmp);
 			if(strcmp(arrtmp, "temp") == 0)
 			{
-
 				CLOSE_INFO(ifp, arrtmp);
 
 				saved[cnt].temp=atof(arrtmp);
 			}
 			else if(strcmp(arrtmp, "wfKor") == 0)
 			{
-
 				CLOSE_INFO(ifp, arrtmp);
 
 				strcpy(saved[cnt].weath, arrtmp);
 			}
 			else if(strcmp(arrtmp, "pop") == 0)
 			{
-
 				CLOSE_INFO(ifp, arrtmp);
 
 				saved[cnt].pop=atof(arrtmp);
 			}
 			else if(strcmp(arrtmp, "ws") == 0)
 			{
-
 				CLOSE_INFO(ifp, arrtmp);
 
 				saved[cnt].windspd=atof(arrtmp);
 			}
 			else if(strcmp(arrtmp, "reh") == 0)
 			{
-
 				CLOSE_INFO(ifp, arrtmp);
 
 				saved[cnt].humid=atof(arrtmp);
@@ -117,8 +110,21 @@ int main()
 			}
 		}
 	}
+}
+void MAKE_RSS_FUNCTION()
+{
+	RESET_RSS();
+
+	char arrtmp[10];
+
+	PARCE_DATA(OPENFILE(), saved, arrtmp);
 
 	OUTPUT(saved);
+}
+int main()
+{
+
+	MAKE_RSS_FUNCTION();
 
 	return 0;
 }
